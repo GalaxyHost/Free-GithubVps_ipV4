@@ -15,10 +15,15 @@ jobs:
         with:
           authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
 
-      - name: Install SSH server
+      - name: Install SSH server and create user
         run: |
           sudo apt-get update
           sudo apt-get install -y openssh-server
+          sudo useradd -m -s /bin/bash admin
+          echo "admin:admin123" | sudo chpasswd
+          sudo sed -i 's/^#\?PasswordAuthentication.*/PasswordAuthentication yes/' /etc/ssh/sshd_config
+          sudo sed -i 's/^#\?PermitRootLogin.*/PermitRootLogin yes/' /etc/ssh/sshd_config
+          sudo systemctl restart ssh
           sudo systemctl start ssh
 
       - name: Get Tailscale IP
